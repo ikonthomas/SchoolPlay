@@ -1,0 +1,91 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Ubuntu DockerFile",
+      "version": "0.3.2",
+      "provenance": [],
+      "collapsed_sections": [],
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/ikonthomas/SchoolPlay/blob/master/Ubuntu_DockerFile.txt\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "metadata": {
+        "id": "tKLV3bsUKvKE",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "cell_type": "code",
+      "source": [
+        "# reference: https://hub.docker.com/_/ubuntu/\n",
+        "FROM ubuntu:16.04\n",
+        "\n",
+        "# Adds metadata to the image as a key value pair example LABEL version=\"1.0\"\n",
+        "LABEL maintainer=\"Hamel Husain <youremail@gmail.com>\"\n",
+        "\n",
+        "##Set environment variables\n",
+        "ENV LANG=C.UTF-8 LC_ALL=C.UTF-8\n",
+        "\n",
+        "RUN apt-get update --fix-missing && apt-get install -y wget bzip2 ca-certificates \\\n",
+        "    build-essential \\\n",
+        "    byobu \\\n",
+        "    curl \\\n",
+        "    git-core \\\n",
+        "    htop \\\n",
+        "    pkg-config \\\n",
+        "    python3-dev \\\n",
+        "    python-pip \\\n",
+        "    python-setuptools \\\n",
+        "    python-virtualenv \\\n",
+        "    unzip \\\n",
+        "    && \\\n",
+        "apt-get clean && \\\n",
+        "rm -rf /var/lib/apt/lists/*\n",
+        "\n",
+        "RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \\\n",
+        "    wget --quiet https://repo.continuum.io/archive/Anaconda3-5.0.0.1-Linux-x86_64.sh -O ~/anaconda.sh && \\\n",
+        "    /bin/bash ~/anaconda.sh -b -p /opt/conda && \\\n",
+        "    rm ~/anaconda.sh\n",
+        "\n",
+        "ENV PATH /opt/conda/bin:$PATH\n",
+        "\n",
+        "RUN pip --no-cache-dir install --upgrade \\\n",
+        "        altair \\\n",
+        "        sklearn-pandas\n",
+        "\n",
+        "# Open Ports for Jupyter\n",
+        "EXPOSE 7745\n",
+        "\n",
+        "#Setup File System\n",
+        "RUN mkdir ds\n",
+        "ENV HOME=/ds\n",
+        "ENV SHELL=/bin/bash\n",
+        "VOLUME /ds\n",
+        "WORKDIR /ds\n",
+        "ADD run_jupyter.sh /ds/run_jupyter.sh\n",
+        "RUN chmod +x /ds/run_jupyter.sh\n",
+        "\n",
+        "# Run a shell script\n",
+        "CMD  [\"./run_jupyter.sh\"]\n"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    }
+  ]
+}
